@@ -9,6 +9,7 @@ import SwiftUI
 
 
 struct RestaurantListView: View {
+    @State var restaurantIsFavorites = Array(repeating: false, count: 21)
     var restaurantNames = ["Cafe Deadend", "Homei", "Teakha", "Cafe Loisl", "Petite Oyster", "For Kee Restaurant", "Po's Atelier", "Bourke Street Bakery", "Haigh's Chocolate", "Palomino Espresso", "Upstate", "Traif", "Graham Avenue Meats", "Waffle & Wolf", "Five Leaves", "Cafe Lore", "Confessional","Barrafina", "Donostia", "Royal Oak", "CASK Pub and Kitchen"]
     
     var restaurantLocations = ["Hong Kong", "Hong Kong", "Hong Kong", "Hong Kong", "Hong Kong", "Hong Kong", "Hong Kong", "Sydney", "Sydney", "Sydney","New York", "New York", "New York", "New York", "New York", "New York", "New York", "London", "London", "London", "London"]
@@ -19,7 +20,7 @@ struct RestaurantListView: View {
     var body: some View {
         List{
             ForEach(restaurantNames.indices , id : \.self){index in
-                VerticalView(imageName: restaurantNames[index], name: restaurantNames[index], type: restaurantTypes[index], location: restaurantLocations[index])
+                VerticalView(imageName: restaurantNames[index], name: restaurantNames[index], type: restaurantTypes[index], location: restaurantLocations[index],isFavorite: $restaurantIsFavorites[index])
                 
             }
             .listRowSeparator(.hidden)
@@ -32,6 +33,8 @@ struct VerticalView : View{
     var name : String
     var type : String
     var location : String
+    
+    @Binding var isFavorite:Bool
     @State private var showOption = false
     @State private var showError = false
     var body : some View {
@@ -49,8 +52,15 @@ struct VerticalView : View{
                 Text(location)
                     .font(.system(.subheadline, design: .rounded))
             }
+            if isFavorite{
+                Spacer()
+                Image(systemName: "heart.fill")
+                
+                    .foregroundColor(.yellow)
+            }
             
         }
+        
         .alert(isPresented:$showError){
             Alert(title: Text("No yet avaiable"),
                   message: Text("Sorry , this feature is not available yet. Please reatry later"),
@@ -61,11 +71,15 @@ struct VerticalView : View{
         .onTapGesture {
             showOption.toggle()
         }.actionSheet(isPresented: $showOption){
+            
             ActionSheet(title: Text("What do you want to do"),message: nil,
                         buttons:[.default(Text("Reserve  a Table")){self.showError.toggle()},
-                                 .default(Text("Mark as Favorite")){},
+                                 isFavorite ? .default(Text("Remove From Favorites")){self.isFavorite=false}
+                                 : .default(Text("Mark as Favorites")){self.isFavorite=true},
                                  .cancel()])
+            
         }
+
     }
 }
 
